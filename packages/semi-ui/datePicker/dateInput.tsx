@@ -1,20 +1,27 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable max-lines-per-function */
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import cls from 'classnames';
 import PropTypes from 'prop-types';
+
 import DateInputFoundation, {
     DateInputAdapter,
     DateInputFoundationProps,
-    RangeType
+    RangeType,
+    InlineInputChangeProps,
+    InlineInputChangeFoundationProps,
 } from '@douyinfe/semi-foundation/datePicker/inputFoundation';
 import { cssClasses, strings } from '@douyinfe/semi-foundation/datePicker/constants';
 import { noop } from '@douyinfe/semi-foundation/utils/function';
 import isNullOrUndefined from '@douyinfe/semi-foundation/utils/isNullOrUndefined';
-import BaseComponent, { BaseProps } from '../_base/baseComponent';
-import Input from '../input/index';
 import { IconCalendar, IconCalendarClock, IconClear } from '@douyinfe/semi-icons';
 import { BaseValueType, ValueType } from '@douyinfe/semi-foundation/datePicker/foundation';
+
+import BaseComponent, { BaseProps } from '../_base/baseComponent';
+import Input from '../input/index';
+import { InlineDateInput, InlineTimeInput } from './inlineInput';
 
 export interface DateInputProps extends DateInputFoundationProps, BaseProps {
     insetLabel?: React.ReactNode;
@@ -25,8 +32,9 @@ export interface DateInputProps extends DateInputFoundationProps, BaseProps {
     onBlur?: (e: React.MouseEvent<HTMLInputElement>) => void;
     onFocus?: (e: React.MouseEvent<HTMLInputElement>, rangeType?: RangeType) => void;
     onClear?: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onInlineInputChange?: (options: InlineInputChangeProps) => void;
+    value?: Date[];
 }
-
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export default class DateInput extends BaseComponent<DateInputProps, {}> {
@@ -55,6 +63,8 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
         rangeInputStartRef: PropTypes.object,
         rangeInputEndRef: PropTypes.object,
         rangeSeparator: PropTypes.string,
+        inlineInput: PropTypes.bool,
+        inlineInputValue: PropTypes.object,
     };
 
     static defaultProps = {
@@ -92,6 +102,7 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
             notifyRangeInputClear: (...args) => this.props.onRangeClear(...args),
             notifyRangeInputFocus: (...args) => this.props.onFocus(...args),
             notifyTabPress: (...args) => this.props.onRangeEndTabPress(...args),
+            notifyInlineInputChange: options => this.props.onInlineInputChange(options),
         };
     }
 
@@ -138,6 +149,10 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
 
     handleRangeStartFocus: React.MouseEventHandler<HTMLElement> = e => {
         this.handleRangeInputFocus(e, 'rangeStart');
+    };
+
+    handleInlineInputChange = (options: InlineInputChangeFoundationProps) => {
+        this.foundation.handleInlineInputChange(options);
     };
 
     getRangeInputValue = (rangeStart: string, rangeEnd: string) => {
@@ -223,11 +238,11 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
         const rangePlaceholder = Array.isArray(placeholder) ? placeholder : [placeholder, placeholder];
         const [rangeStartPlaceholder, rangeEndPlaceholder] = rangePlaceholder;
         const inputLeftWrapperCls = cls(`${prefixCls}-range-input-wrapper-start`, `${prefixCls}-range-input-wrapper`, {
-            [`${prefixCls}-range-input-wrapper-active`]: rangeInputFocus === 'rangeStart',
-            [`${prefixCls}-range-input-wrapper-start-with-prefix`]: this.props.prefix || this.props.insetLabel
+            [`${prefixCls}-range-input-wrapper-active`]: rangeInputFocus === 'rangeStart' && !disabled,
+            [`${prefixCls}-range-input-wrapper-start-with-prefix`]: this.props.prefix || this.props.insetLabel,
         });
         const inputRightWrapperCls = cls(`${prefixCls}-range-input-wrapper-end`, `${prefixCls}-range-input-wrapper`, {
-            [`${prefixCls}-range-input-wrapper-active`]: rangeInputFocus === 'rangeEnd'
+            [`${prefixCls}-range-input-wrapper-active`]: rangeInputFocus === 'rangeEnd' && !disabled,
         });
         return (
             <>
@@ -279,7 +294,72 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
         );
     }
 
-    render() {
+    renderInputInline() {
+        const {
+            type,
+            handleInlineDateFocus,
+            handleInlineTimeFocus,
+            value,
+            inlineInputValue,
+            prefixCls,
+            rangeInputStartRef,
+            rangeInputEndRef,
+            density,
+        } = this.props;
+
+        const _isRangeType = type.includes('Range');
+        const newInlineInputValue = this.foundation.getInlineInputValue({ value, inlineInputValue });
+        const { datePlaceholder, timePlaceholder } = this.foundation.getInlineInputPlaceholder();
+
+        const inlineInputWrapperCls = `${prefixCls}-inline-input-wrapper`;
+        const separatorCls = `${prefixCls}-inline-input-separator`;
+
+        return (
+            <div className={inlineInputWrapperCls} x-type={type}>
+                <InlineDateInput
+                    forwardRef={rangeInputStartRef}
+                    inlineInputValue={newInlineInputValue}
+                    placeholder={datePlaceholder}
+                    valuePath={'monthLeft.dateInput'}
+                    onChange={this.handleInlineInputChange}
+                    onFocus={e => handleInlineDateFocus(e, 'rangeStart')}
+                />
+                <InlineTimeInput
+                    disabled={!newInlineInputValue.monthLeft.dateInput}
+                    inlineInputValue={newInlineInputValue}
+                    placeholder={timePlaceholder}
+                    type={type}
+                    valuePath={'monthLeft.timeInput'}
+                    onChange={this.handleInlineInputChange}
+                    onFocus={handleInlineTimeFocus}
+                />
+                {_isRangeType && (
+                    <>
+                        <div className={separatorCls}>{density === 'compact' ? null : '-'}</div>
+                        <InlineDateInput
+                            forwardRef={rangeInputEndRef}
+                            inlineInputValue={newInlineInputValue}
+                            placeholder={datePlaceholder}
+                            valuePath={'monthRight.dateInput'}
+                            onChange={this.handleInlineInputChange}
+                            onFocus={e => handleInlineDateFocus(e, 'rangeEnd')}
+                        />
+                        <InlineTimeInput
+                            disabled={!newInlineInputValue.monthRight.dateInput}
+                            inlineInputValue={newInlineInputValue}
+                            placeholder={timePlaceholder}
+                            type={type}
+                            valuePath={'monthRight.timeInput'}
+                            onChange={this.handleInlineInputChange}
+                            onFocus={handleInlineTimeFocus}
+                        />
+                    </>
+                )}
+            </div>
+        );
+    }
+
+    renderTriggerInput() {
         const {
             placeholder,
             type,
@@ -308,6 +388,8 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
             onRangeEndTabPress,
             rangeInputFocus,
             rangeSeparator,
+            inlineInput,
+            inlineInputValue,
             ...rest
         } = this.props;
         const dateIcon = <IconCalendar />;
@@ -354,5 +436,10 @@ export default class DateInput extends BaseComponent<DateInputProps, {}> {
                 onFocus={onFocus as any}
             />
         );
+    }
+
+    render() {
+        const { inlineInput } = this.props;
+        return inlineInput ? this.renderInputInline() : this.renderTriggerInput();
     }
 }

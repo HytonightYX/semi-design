@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { forwardStatics } from '@douyinfe/semi-foundation/utils/object';
+import { numbers, strings } from '@douyinfe/semi-foundation/datePicker/constants';
 import DatePicker, { DatePickerProps } from './datePicker';
 import ConfigContext from '../configProvider/context';
 import LocaleConsumer from '../locale/localeConsumer';
@@ -31,6 +32,15 @@ export default forwardStatics(
         // Add spaces at both ends to prevent conflicts with characters in the date when separating
         if (rangeSeparator && typeof rangeSeparator === 'string') {
             propsObj.rangeSeparator = ` ${rangeSeparator.trim()} `;
+        }
+
+        if (propsObj.inlineInput) {
+            if (!propsObj.position) {
+                propsObj.position = strings.POSITION_INLINE_INPUT;
+            }
+            if (!propsObj.spacing) {
+                propsObj.spacing = numbers.SPACING_INLINE_INPUT;
+            }
         }
 
         return (

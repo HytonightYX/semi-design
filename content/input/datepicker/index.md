@@ -123,6 +123,50 @@ import { DatePicker } from '@douyinfe/semi-ui';
 () => <DatePicker type="dateTimeRange" style={{ width: 380 }} onChange={console.log} />;
 ```
 
+### 内嵌输入框
+
+使用 inlineInput 可以控制日期面板是否内嵌输入框，默认为 false。v2.6.0 后支持。
+
+inlineInput 开启后包括以下功能：
+
+- 点击触发器后，面板默认在原有位置弹出。你可以通过 position 自定义弹出位置
+- 点击内嵌日期输入框，面板切换到日期选择；点击内嵌时间输入框，面板切换到时间选择
+
+<Notice type="primary" title="注意事项">
+    <div>注意，开启后会对组件做一些调整和限制：</div>
+    <div>1. 触发器样式：未打开面板时触发器只读，打开时触发器禁用</div>
+    <div>2. 面板样式：type 包括 time 时，隐藏底部的切换按钮</div>
+    <div>3. 开启 inlineInput 后 format 只支持 `dateFormat[ timeFormat]` 格式，使用其他格式会影响内嵌输入框 placeholder 和触发器文本的展示</div>
+</Notice>
+
+```jsx live=true
+import React from 'react';
+import { DatePicker } from '@douyinfe/semi-ui';
+
+function Demo() {
+    return (
+        <div>
+            <DatePicker type="date" inlineInput />
+            <br />
+            <br />
+            <DatePicker type="dateTime" inlineInput />
+            <br />
+            <br />
+            <DatePicker type="dateRange" inlineInput style={{ width: 260 }} />
+            <br />
+            <br />
+            <DatePicker type="dateTimeRange" inlineInput style={{ width: 400 }} />
+            <br />
+            <br />
+            <DatePicker type="date" position="bottomLeft" inlineInput />
+            <br />
+            <br />
+            <DatePicker type="dateTime" format="yyyy-MM-dd HH:mm" inlineInput />
+        </div>
+    );
+}
+```
+
 ### 同步切换双面板月份
 
 version: >= 1.28.0
@@ -617,7 +661,7 @@ function Demo() {
 
 `dayStatus` 表示当前格子的状态，包括的 `key` 有：
 
-```tsx
+```md
 type DayStatusType = {
     isToday?: boolean; // 当前日
     isSelected?: boolean; // 被选中
@@ -705,6 +749,7 @@ function Demo() {
 | format | 在输入框内展现的日期串格式 | string | 与 type 对应：详见[日期时间格式](#日期时间格式) |  |
 | getPopupContainer | 指定父级 DOM，弹层将会渲染至该 DOM 中，自定义需要设置 `position: relative` | function():HTMLElement | () => document.body |  |
 | hideDisabledOptions | 隐藏禁止选择的时间 | boolean | false |  |
+| inlineInput | 面板中是否嵌入输入框 | boolean | false |  | **2.6.0**
 | inputReadOnly | 文本框是否 readonly | boolean | false |  |
 | inputStyle | 输入框样式 | object |  |  |
 | insetLabel | 前缀标签，优先级低于 `prefix` | string\|ReactNode |  |  |

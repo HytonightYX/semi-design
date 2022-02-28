@@ -137,6 +137,47 @@ class App extends React.Component {
 }
 ```
 
+### Input in Panel
+
+Use `inlineInput` to control whether the date panel is inline with the input box, the default is `false`. Supported since `v2.6.0`.
+
+After `inlineInput` is turned on, it includes the following functions:
+
+- After clicking the trigger, the panel will pop up in the original position by default. You can customize the popup position by `position`
+- Click the embedded date input box, the panel switches to date selection; click the embedded time input box, the panel switches to time selection
+
+<Notice type="primary" title="Notes">
+     <div>Note that some adjustments and restrictions will be made to the components after opening inlineInput:</div>
+     <div>1. Trigger style: the trigger is read-only when the panel is not open, and the trigger is disabled when it is open</div>
+     <div>2. Panel style: when type includes time, hide the toggle button at the bottom</div>
+     <div>3. After inlineInput is enabled, the `format` API only supports the `dateFormat[ timeFormat]` format. Using other formats will affect the display of the inline input box placeholder and trigger text</div>
+</Notice>
+
+```jsx live=true
+import React from 'react';
+import { DatePicker } from '@douyinfe/semi-ui';
+
+function Demo() {
+    return (
+        <div>
+            <DatePicker type="date" inlineInput />
+            <br />
+            <br />
+            <DatePicker type="dateTime" inlineInput />
+            <br />
+            <br />
+            <DatePicker type="dateRange" inlineInput style={{ width: 260 }} />
+            <br />
+            <br />
+            <DatePicker type="dateTimeRange" inlineInput style={{ width: 400 }} />
+            <br />
+            <br />
+            <DatePicker type="dateTime" format="yyyy-MM-dd HH:mm" inlineInput />
+        </div>
+    );
+}
+```
+
 ### Synchronously switch months
 
 version：>= 1.28.0
@@ -667,7 +708,7 @@ function Demo() {
 
 `dayStatus` is this status of current date box. The included keys are as follows.
 
-```tsx
+```md
 type DayStatusType = {
     isToday?: boolean,
     isSelected?: boolean,
@@ -757,6 +798,7 @@ function Demo() {
 | format             | Date string format displayed in the input box                                                                                                                                             | string                                                                                                                                                                                                    | Corresponding to type: For details, see [Date and Time Format](#Date%20and%20Time%20Format) |                           |
 | getPopupContainer | Specifies the parent DOM, and the bullet layer will be rendered to the DOM, you need to set 'position: relative` | function():HTMLElement | () = > document.body |
 | inputReadOnly      | Is the text box readonly                                                                                                                                                                  | boolean                                                                                                                                                                                                   | false                                                                                 |                           |
+| inlineInput        | Whether the input box is embedded in the panel                                                                                                                                            | boolean                                                                                                                                                                                                   | false                                                                                 | **2.6.0**                          |
 | inputStyle         | Input box style                                                                                                                                                                           | object                                                                                                                                                                                                    |                                                                                       |                           |
 | insetLabel         | Prefix label, lower priority than `prefix`                                                                                                                                                | string\|ReactNode                                                                                                                                                                                         |                                                                                       |                           |
 | max                | When multiple is set to true, the number of selected, non-pass or value is null\|undefined, unlimited.                                                                                     | number                                                                                                                                                                                                    | -                                                                                     |                           |
